@@ -4,7 +4,14 @@ import ReactDOM from "react-dom";
 const App: React.FC = () => {
   return (
     <div>
-      <h1>Hello.</h1>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <input type="text" value={""} onChange={(e) => e.preventDefault()} />
+        <input
+          type="submit"
+          value="追加"
+          onChange={(e) => e.preventDefault()}
+        />
+      </form>
     </div>
   );
 };

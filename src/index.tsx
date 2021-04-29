@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 
 interface Todo {
   value: string;
+  id: number;
 }
 
 const App: React.FC = () => {
@@ -21,6 +22,7 @@ const App: React.FC = () => {
     // 新しい Todo を作成
     const newTodo: Todo = {
       value: text,
+      id: new Date().getTime(),
     };
 
     // newTodo を追加したのち、スプレッド構文で todos へ値を展開する
@@ -41,7 +43,7 @@ const App: React.FC = () => {
       </form>
       <ul>
         {todos.map((todo) => (
-          <li>{todo.value}</li>
+          <li key={todo.id}>{todo.value}</li>
         ))}
       </ul>
     </div>

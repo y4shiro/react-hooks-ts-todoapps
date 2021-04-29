@@ -39,6 +39,11 @@ const App: React.FC = () => {
         />
         <input type="submit" value="追加" onClick={(e) => handleOnSubmit(e)} />
       </form>
+      <ul>
+        {todos.map((todo) => (
+          <li>{todo.value}</li>
+        ))}
+      </ul>
     </div>
   );
 };

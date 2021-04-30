@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 interface Todo {
   value: string;
   id: number;
+  checked: boolean;
 }
 
 const App: React.FC = () => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
     const newTodo: Todo = {
       value: text,
       id: new Date().getTime(),
+      checked: false,
     };
 
     // newTodo を追加したのち、スプレッド構文で todos へ値を展開する
@@ -44,6 +46,18 @@ const App: React.FC = () => {
     setTodos(newTodos);
   };
 
+  // todo のチェックボックスがクリックされた時に状態を変更する関数
+  const handleOnCheck = (id: number, checked: boolean) => {
+    const newTodos = todos.map((todo) => {
+      if (todo.id === id) {
+        todo.checked = !checked;
+      }
+      return todo;
+    });
+
+    setTodos(newTodos);
+  };
+
   return (
     <div>
       <form onSubmit={(e) => handleOnSubmit(e)}>
@@ -58,7 +72,13 @@ const App: React.FC = () => {
         {todos.map((todo) => (
           <li key={todo.id}>
             <input
+              type="checkbox"
+              checked={todo.checked}
+              onChange={() => handleOnCheck(todo.id, todo.checked)}
+            />
+            <input
               type="text"
+              disabled={todo.checked}
               value={todo.value}
               onChange={(e) => handleOnEdit(todo.id, e.target.value)}
             />

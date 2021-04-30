@@ -10,7 +10,7 @@ const App: React.FC = () => {
   const [text, setText] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
 
-  // todos ステートを更新する関数
+  // todos ステートを追加する関数
   const handleOnSubmit = (
     e: React.FormEvent<HTMLFormElement> | React.FormEvent<HTMLInputElement>
   ) => {
@@ -31,6 +31,19 @@ const App: React.FC = () => {
     setText("");
   };
 
+  // 既存の todo を編集する関数
+  const handleOnEdit = (id: number, value: string) => {
+    // todos から編集したい todo を id で検索し、マッチした場合に value を書き換える
+    const newTodos = todos.map((todo) => {
+      if (todo.id === id) {
+        todo.value = value;
+      }
+      return todo;
+    });
+
+    setTodos(newTodos);
+  };
+
   return (
     <div>
       <form onSubmit={(e) => handleOnSubmit(e)}>
@@ -43,7 +56,13 @@ const App: React.FC = () => {
       </form>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>{todo.value}</li>
+          <li key={todo.id}>
+            <input
+              type="text"
+              value={todo.value}
+              onChange={(e) => handleOnEdit(todo.id, e.target.value)}
+            />
+          </li>
         ))}
       </ul>
     </div>

@@ -8,9 +8,12 @@ interface Todo {
   removed: boolean;
 }
 
+type Filter = "all" | "checked" | "unchecked" | "removed";
+
 const App: React.FC = () => {
   const [text, setText] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [filter, setFilter] = useState<Filter>("all");
 
   // todos ステートを追加する関数
   const handleOnSubmit = (
@@ -72,18 +75,49 @@ const App: React.FC = () => {
     setTodos(newTodos);
   };
 
+  // フィルターの状態の応じて todos をフィルタリングして返す
+  const filterdTodos = todos.filter((todo) => {
+    switch (filter) {
+      case "all":
+        return !todo.removed;
+      case "checked":
+        return todo.checked && !todo.removed;
+      case "unchecked":
+        return !todo.checked && !todo.removed;
+      case "removed":
+        return todo.removed;
+      default:
+        return todo;
+    }
+  });
+
   return (
     <div>
+      <select
+        defaultValue="all"
+        onChange={(e) => setFilter(e.target.value as Filter)}
+      >
+        <option value="all">全てのタスク</option>
+        <option value="checked">完了したタスク</option>
+        <option value="unchecked">未完了のタスク</option>
+        <option value="removed">削除済みのタスク</option>
+      </select>
       <form onSubmit={(e) => handleOnSubmit(e)}>
         <input
           type="text"
           value={text}
+          disabled={filter === "checked" || filter === "removed"}
           onChange={(e) => setText(e.target.value)}
         />
-        <input type="submit" value="追加" onClick={(e) => handleOnSubmit(e)} />
+        <input
+          type="submit"
+          value="追加"
+          disabled={filter === "removed" || filter === "checked"}
+          onClick={(e) => handleOnSubmit(e)}
+        />
       </form>
       <ul>
-        {todos.map((todo) => (
+        {filterdTodos.map((todo) => (
           <li key={todo.id}>
             <input
               type="checkbox"

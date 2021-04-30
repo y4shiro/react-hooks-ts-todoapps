@@ -75,6 +75,12 @@ const App: React.FC = () => {
     setTodos(newTodos);
   };
 
+  // todos から removed フラグが true になっている todo を削除する
+  const handleOnEmpty = () => {
+    const newTodos = todos.filter((todo) => !todo.removed);
+    setTodos(newTodos);
+  };
+
   // フィルターの状態の応じて todos をフィルタリングして返す
   const filterdTodos = todos.filter((todo) => {
     switch (filter) {
@@ -102,20 +108,29 @@ const App: React.FC = () => {
         <option value="unchecked">未完了のタスク</option>
         <option value="removed">削除済みのタスク</option>
       </select>
-      <form onSubmit={(e) => handleOnSubmit(e)}>
-        <input
-          type="text"
-          value={text}
-          disabled={filter === "checked" || filter === "removed"}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <input
-          type="submit"
-          value="追加"
-          disabled={filter === "removed" || filter === "checked"}
-          onClick={(e) => handleOnSubmit(e)}
-        />
-      </form>
+      {filter === "removed" ? (
+        <button
+          disabled={todos.filter((todo) => todo.removed).length === 0}
+          onClick={() => handleOnEmpty()}
+        >
+          ゴミ箱を空にする
+        </button>
+      ) : (
+        <form onSubmit={(e) => handleOnSubmit(e)}>
+          <input
+            type="text"
+            value={text}
+            disabled={filter === "checked"}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <input
+            type="submit"
+            value="追加"
+            disabled={filter === "checked"}
+            onSubmit={(e) => handleOnSubmit(e)}
+          />
+        </form>
+      )}
       <ul>
         {filterdTodos.map((todo) => (
           <li key={todo.id}>

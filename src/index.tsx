@@ -5,6 +5,7 @@ interface Todo {
   value: string;
   id: number;
   checked: boolean;
+  removed: boolean;
 }
 
 const App: React.FC = () => {
@@ -25,6 +26,7 @@ const App: React.FC = () => {
       value: text,
       id: new Date().getTime(),
       checked: false,
+      removed: false,
     };
 
     // newTodo を追加したのち、スプレッド構文で todos へ値を展開する
@@ -46,11 +48,23 @@ const App: React.FC = () => {
     setTodos(newTodos);
   };
 
-  // todo のチェックボックスがクリックされた時に状態を変更する関数
+  // todo のチェックボックスをクリックした時に cheked の値を反転する関数
   const handleOnCheck = (id: number, checked: boolean) => {
     const newTodos = todos.map((todo) => {
       if (todo.id === id) {
         todo.checked = !checked;
+      }
+      return todo;
+    });
+
+    setTodos(newTodos);
+  };
+
+  // todo の削除ボタンをクリックした時に removed を false に変更する関数
+  const handleOnRemove = (id: number, removed: boolean) => {
+    const newTodos = todos.map((todo) => {
+      if (todo.id === id) {
+        todo.removed = !removed;
       }
       return todo;
     });
@@ -73,15 +87,19 @@ const App: React.FC = () => {
           <li key={todo.id}>
             <input
               type="checkbox"
+              disabled={todo.removed}
               checked={todo.checked}
               onChange={() => handleOnCheck(todo.id, todo.checked)}
             />
             <input
               type="text"
-              disabled={todo.checked}
+              disabled={todo.checked || todo.removed}
               value={todo.value}
               onChange={(e) => handleOnEdit(todo.id, e.target.value)}
             />
+            <button onClick={() => handleOnRemove(todo.id, todo.removed)}>
+              {todo.removed ? "復元" : "削除"}
+            </button>
           </li>
         ))}
       </ul>

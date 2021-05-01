@@ -1,6 +1,17 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 
+import {
+  Button,
+  Checkbox,
+  Input,
+  MenuItem,
+  List,
+  ListItem,
+  Select,
+  TextField,
+} from "@material-ui/core";
+
 interface Todo {
   value: string;
   id: number;
@@ -17,7 +28,10 @@ const App: React.FC = () => {
 
   // todos ステートを追加する関数
   const handleOnSubmit = (
-    e: React.FormEvent<HTMLFormElement> | React.FormEvent<HTMLInputElement>
+    e:
+      | React.FormEvent<HTMLFormElement>
+      | React.FormEvent<HTMLInputElement>
+      | React.FormEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
 
@@ -98,61 +112,62 @@ const App: React.FC = () => {
   });
 
   return (
-    <div>
-      <select
+    <>
+      <Select
         defaultValue="all"
         onChange={(e) => setFilter(e.target.value as Filter)}
       >
-        <option value="all">全てのタスク</option>
-        <option value="checked">完了したタスク</option>
-        <option value="unchecked">未完了のタスク</option>
-        <option value="removed">削除済みのタスク</option>
-      </select>
+        <MenuItem value="all">全てのタスク</MenuItem>
+        <MenuItem value="checked">完了したタスク</MenuItem>
+        <MenuItem value="unchecked">未完了のタスク</MenuItem>
+        <MenuItem value="removed">削除済みのタスク</MenuItem>
+      </Select>
       {filter === "removed" ? (
-        <button
+        <Button
           disabled={todos.filter((todo) => todo.removed).length === 0}
           onClick={() => handleOnEmpty()}
         >
           ゴミ箱を空にする
-        </button>
+        </Button>
       ) : (
         <form onSubmit={(e) => handleOnSubmit(e)}>
-          <input
+          <TextField
             type="text"
             value={text}
             disabled={filter === "checked"}
             onChange={(e) => setText(e.target.value)}
           />
-          <input
+          <Button
             type="submit"
-            value="追加"
+            color="primary"
             disabled={filter === "checked"}
             onSubmit={(e) => handleOnSubmit(e)}
-          />
+          >
+            追加
+          </Button>
         </form>
       )}
-      <ul>
+      <List>
         {filterdTodos.map((todo) => (
-          <li key={todo.id}>
-            <input
-              type="checkbox"
+          <ListItem key={todo.id}>
+            <Checkbox
               disabled={todo.removed}
               checked={todo.checked}
               onChange={() => handleOnCheck(todo.id, todo.checked)}
             />
-            <input
+            <Input
               type="text"
               disabled={todo.checked || todo.removed}
               value={todo.value}
               onChange={(e) => handleOnEdit(todo.id, e.target.value)}
             />
-            <button onClick={() => handleOnRemove(todo.id, todo.removed)}>
+            <Button onClick={() => handleOnRemove(todo.id, todo.removed)}>
               {todo.removed ? "復元" : "削除"}
-            </button>
-          </li>
+            </Button>
+          </ListItem>
         ))}
-      </ul>
-    </div>
+      </List>
+    </>
   );
 };
 

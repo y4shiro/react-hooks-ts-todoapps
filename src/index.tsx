@@ -116,20 +116,42 @@ const EmptyButton: React.VFC<{ dispatch: Dispatch<Action> }> = memo(
 );
 EmptyButton.displayName = "EmptyButton";
 
+const Form: React.VFC<{ state: State; dispatch: Dispatch<Action> }> = memo(
+  ({ state, dispatch }) => {
+    // todos ステートを追加する関数
+    const handleOnSubmit = (
+      e: React.FormEvent<HTMLFormElement | HTMLInputElement>
+    ) => {
+      e.preventDefault();
+      dispatch({ type: "submit" });
+    };
+
+    const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch({ type: "change", value: e.target.value });
+    };
+
+    return (
+      <form onSubmit={(e) => handleOnSubmit(e)}>
+        <input
+          type="text"
+          value={state.text}
+          disabled={state.filter === "checked"}
+          onChange={handleOnChange}
+        />
+        <input
+          type="submit"
+          value="追加"
+          disabled={state.filter === "checked"}
+          onSubmit={(e) => handleOnSubmit(e)}
+        />
+      </form>
+    );
+  }
+);
+Form.displayName = "Form";
+
 const App: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: "change", value: e.target.value });
-  };
-
-  // todos ステートを追加する関数
-  const handleOnSubmit = (
-    e: React.FormEvent<HTMLFormElement | HTMLInputElement>
-  ) => {
-    e.preventDefault();
-    dispatch({ type: "submit" });
-  };
 
   // 既存の todo を編集する関数
   const handleOnEdit = (id: number, value: string) => {
@@ -168,20 +190,7 @@ const App: React.FC = () => {
       {state.filter === "removed" ? (
         <EmptyButton dispatch={dispatch} />
       ) : (
-        <form onSubmit={(e) => handleOnSubmit(e)}>
-          <input
-            type="text"
-            value={state.text}
-            disabled={state.filter === "checked"}
-            onChange={handleOnChange}
-          />
-          <input
-            type="submit"
-            value="追加"
-            disabled={state.filter === "checked"}
-            onSubmit={(e) => handleOnSubmit(e)}
-          />
-        </form>
+        <Form state={state} dispatch={dispatch} />
       )}
       <ul>
         {filterdTodos.map((todo) => (

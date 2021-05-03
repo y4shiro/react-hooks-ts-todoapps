@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, memo, Dispatch } from "react";
 import ReactDOM from "react-dom";
 
 interface Todo {
@@ -86,6 +86,24 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
+const Selector: React.VFC<{ dispatch: Dispatch<Action> }> = memo(
+  ({ dispatch }) => {
+    const handleOnFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      dispatch({ type: "filter", value: e.target.value as Filter });
+    };
+
+    return (
+      <select defaultValue="all" onChange={handleOnFilter}>
+        <option value="all">全てのタスク</option>
+        <option value="checked">完了したタスク</option>
+        <option value="unchecked">未完了のタスク</option>
+        <option value="removed">削除済みのタスク</option>
+      </select>
+    );
+  }
+);
+Selector.displayName = "Selector";
+
 const App: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -116,10 +134,6 @@ const App: React.FC = () => {
     dispatch({ type: "remove", id, removed });
   };
 
-  const handleOnFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    dispatch({ type: "filter", value: e.target.value as Filter });
-  };
-
   // todos から removed フラグが true になっている todo を削除する
   const handleOnEmpty = () => {
     dispatch({ type: "empty" });
@@ -143,12 +157,7 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <select defaultValue="all" onChange={handleOnFilter}>
-        <option value="all">全てのタスク</option>
-        <option value="checked">完了したタスク</option>
-        <option value="unchecked">未完了のタスク</option>
-        <option value="removed">削除済みのタスク</option>
-      </select>
+      <Selector dispatch={dispatch} />
       {state.filter === "removed" ? (
         <button
           disabled={state.todos.filter((todo) => todo.removed).length === 0}

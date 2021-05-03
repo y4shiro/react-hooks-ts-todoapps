@@ -104,6 +104,18 @@ const Selector: React.VFC<{ dispatch: Dispatch<Action> }> = memo(
 );
 Selector.displayName = "Selector";
 
+const EmptyButton: React.VFC<{ dispatch: Dispatch<Action> }> = memo(
+  ({ dispatch }) => {
+    // todos から removed フラグが true になっている todo を削除する
+    const handleOnEmpty = () => {
+      dispatch({ type: "empty" });
+    };
+
+    return <button onClick={() => handleOnEmpty()}>ゴミ箱を空にする</button>;
+  }
+);
+EmptyButton.displayName = "EmptyButton";
+
 const App: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -134,11 +146,6 @@ const App: React.FC = () => {
     dispatch({ type: "remove", id, removed });
   };
 
-  // todos から removed フラグが true になっている todo を削除する
-  const handleOnEmpty = () => {
-    dispatch({ type: "empty" });
-  };
-
   // フィルターの状態の応じて todos をフィルタリングして返す
   const filterdTodos = state.todos.filter((todo) => {
     switch (state.filter) {
@@ -159,12 +166,7 @@ const App: React.FC = () => {
     <div>
       <Selector dispatch={dispatch} />
       {state.filter === "removed" ? (
-        <button
-          disabled={state.todos.filter((todo) => todo.removed).length === 0}
-          onClick={() => handleOnEmpty()}
-        >
-          ゴミ箱を空にする
-        </button>
+        <EmptyButton dispatch={dispatch} />
       ) : (
         <form onSubmit={(e) => handleOnSubmit(e)}>
           <input

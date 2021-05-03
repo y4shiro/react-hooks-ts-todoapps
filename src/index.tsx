@@ -1,4 +1,10 @@
-import React, { useReducer, memo, Dispatch } from "react";
+import React, {
+  useReducer,
+  memo,
+  Dispatch,
+  createContext,
+  useContext,
+} from "react";
 import ReactDOM from "react-dom";
 
 interface Todo {
@@ -30,6 +36,13 @@ type Action =
   | { type: "edit"; id: number; value: string }
   | { type: "check"; id: number; checked: boolean }
   | { type: "remove"; id: number; removed: boolean };
+
+const AppCotext = createContext(
+  {} as {
+    state: State;
+    dispatch: Dispatch<Action>;
+  }
+);
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -86,74 +99,69 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
-const Selector: React.VFC<{ dispatch: Dispatch<Action> }> = memo(
-  ({ dispatch }) => {
-    const handleOnFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      dispatch({ type: "filter", value: e.target.value as Filter });
-    };
+const Selector: React.VFC = memo(() => {
+  const { dispatch } = useContext(AppCotext);
+  const handleOnFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    dispatch({ type: "filter", value: e.target.value as Filter });
+  };
 
-    return (
-      <select defaultValue="all" onChange={handleOnFilter}>
-        <option value="all">全てのタスク</option>
-        <option value="checked">完了したタスク</option>
-        <option value="unchecked">未完了のタスク</option>
-        <option value="removed">削除済みのタスク</option>
-      </select>
-    );
-  }
-);
+  return (
+    <select defaultValue="all" onChange={handleOnFilter}>
+      <option value="all">全てのタスク</option>
+      <option value="checked">完了したタスク</option>
+      <option value="unchecked">未完了のタスク</option>
+      <option value="removed">削除済みのタスク</option>
+    </select>
+  );
+});
 Selector.displayName = "Selector";
 
-const EmptyButton: React.VFC<{ dispatch: Dispatch<Action> }> = memo(
-  ({ dispatch }) => {
-    // todos から removed フラグが true になっている todo を削除する
-    const handleOnEmpty = () => {
-      dispatch({ type: "empty" });
-    };
+const EmptyButton: React.VFC = memo(() => {
+  const { dispatch } = useContext(AppCotext);
+  // todos から removed フラグが true になっている todo を削除する
+  const handleOnEmpty = () => {
+    dispatch({ type: "empty" });
+  };
 
-    return <button onClick={() => handleOnEmpty()}>ゴミ箱を空にする</button>;
-  }
-);
+  return <button onClick={() => handleOnEmpty()}>ゴミ箱を空にする</button>;
+});
 EmptyButton.displayName = "EmptyButton";
 
-const Form: React.VFC<{ state: State; dispatch: Dispatch<Action> }> = memo(
-  ({ state, dispatch }) => {
-    // todos ステートを追加する関数
-    const handleOnSubmit = (
-      e: React.FormEvent<HTMLFormElement | HTMLInputElement>
-    ) => {
-      e.preventDefault();
-      dispatch({ type: "submit" });
-    };
+const Form: React.VFC = memo(() => {
+  const { state, dispatch } = useContext(AppCotext);
+  // todos ステートを追加する関数
+  const handleOnSubmit = (
+    e: React.FormEvent<HTMLFormElement | HTMLInputElement>
+  ) => {
+    e.preventDefault();
+    dispatch({ type: "submit" });
+  };
 
-    const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      dispatch({ type: "change", value: e.target.value });
-    };
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: "change", value: e.target.value });
+  };
 
-    return (
-      <form onSubmit={(e) => handleOnSubmit(e)}>
-        <input
-          type="text"
-          value={state.text}
-          disabled={state.filter === "checked"}
-          onChange={handleOnChange}
-        />
-        <input
-          type="submit"
-          value="追加"
-          disabled={state.filter === "checked"}
-          onSubmit={(e) => handleOnSubmit(e)}
-        />
-      </form>
-    );
-  }
-);
+  return (
+    <form onSubmit={(e) => handleOnSubmit(e)}>
+      <input
+        type="text"
+        value={state.text}
+        disabled={state.filter === "checked"}
+        onChange={handleOnChange}
+      />
+      <input
+        type="submit"
+        value="追加"
+        disabled={state.filter === "checked"}
+        onSubmit={(e) => handleOnSubmit(e)}
+      />
+    </form>
+  );
+});
 Form.displayName = "Form";
 
-const FilteredTodos: React.VFC<{
-  state: State;
-  dispatch: Dispatch<Action>;
-}> = memo(({ state, dispatch }) => {
+const FilteredTodos: React.VFC = memo(() => {
+  const { state, dispatch } = useContext(AppCotext);
   // 既存の todo を編集する関数
   const handleOnEdit = (id: number, value: string) => {
     dispatch({ type: "edit", id, value });
@@ -215,15 +223,13 @@ const App: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
-    <div>
-      <Selector dispatch={dispatch} />
-      {state.filter === "removed" ? (
-        <EmptyButton dispatch={dispatch} />
-      ) : (
-        <Form state={state} dispatch={dispatch} />
-      )}
-      <FilteredTodos state={state} dispatch={dispatch} />
-    </div>
+    <AppCotext.Provider value={{ state, dispatch }}>
+      <div>
+        <Selector />
+        {state.filter === "removed" ? <EmptyButton /> : <Form />}
+        <FilteredTodos />
+      </div>
+    </AppCotext.Provider>
   );
 };
 

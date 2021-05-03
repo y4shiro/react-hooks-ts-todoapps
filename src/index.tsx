@@ -150,9 +150,10 @@ const Form: React.VFC<{ state: State; dispatch: Dispatch<Action> }> = memo(
 );
 Form.displayName = "Form";
 
-const App: React.FC = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
+const FilteredTodos: React.VFC<{
+  state: State;
+  dispatch: Dispatch<Action>;
+}> = memo(({ state, dispatch }) => {
   // 既存の todo を編集する関数
   const handleOnEdit = (id: number, value: string) => {
     dispatch({ type: "edit", id, value });
@@ -185,6 +186,35 @@ const App: React.FC = () => {
   });
 
   return (
+    <ul>
+      {filterdTodos.map((todo) => (
+        <li key={todo.id}>
+          <input
+            type="checkbox"
+            disabled={todo.removed}
+            checked={todo.checked}
+            onChange={() => handleOnCheck(todo.id, todo.checked)}
+          />
+          <input
+            type="text"
+            disabled={todo.checked || todo.removed}
+            value={todo.value}
+            onChange={(e) => handleOnEdit(todo.id, e.target.value)}
+          />
+          <button onClick={() => handleOnRemove(todo.id, todo.removed)}>
+            {todo.removed ? "復元" : "削除"}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+});
+FilteredTodos.displayName = "FilteredTodos";
+
+const App: React.FC = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
     <div>
       <Selector dispatch={dispatch} />
       {state.filter === "removed" ? (
@@ -192,27 +222,7 @@ const App: React.FC = () => {
       ) : (
         <Form state={state} dispatch={dispatch} />
       )}
-      <ul>
-        {filterdTodos.map((todo) => (
-          <li key={todo.id}>
-            <input
-              type="checkbox"
-              disabled={todo.removed}
-              checked={todo.checked}
-              onChange={() => handleOnCheck(todo.id, todo.checked)}
-            />
-            <input
-              type="text"
-              disabled={todo.checked || todo.removed}
-              value={todo.value}
-              onChange={(e) => handleOnEdit(todo.id, e.target.value)}
-            />
-            <button onClick={() => handleOnRemove(todo.id, todo.removed)}>
-              {todo.removed ? "復元" : "削除"}
-            </button>
-          </li>
-        ))}
-      </ul>
+      <FilteredTodos state={state} dispatch={dispatch} />
     </div>
   );
 };

@@ -15,6 +15,10 @@ const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
 
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
+  };
+
   // todos ステートを追加する関数
   const handleOnSubmit = (
     e: React.FormEvent<HTMLFormElement> | React.FormEvent<HTMLInputElement>
@@ -75,6 +79,10 @@ const App: React.FC = () => {
     setTodos(newTodos);
   };
 
+  const handleOnFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(e.target.value as Filter);
+  };
+
   // todos から removed フラグが true になっている todo を削除する
   const handleOnEmpty = () => {
     const newTodos = todos.filter((todo) => !todo.removed);
@@ -99,10 +107,7 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <select
-        defaultValue="all"
-        onChange={(e) => setFilter(e.target.value as Filter)}
-      >
+      <select defaultValue="all" onChange={handleOnFilter}>
         <option value="all">全てのタスク</option>
         <option value="checked">完了したタスク</option>
         <option value="unchecked">未完了のタスク</option>
@@ -121,7 +126,7 @@ const App: React.FC = () => {
             type="text"
             value={text}
             disabled={filter === "checked"}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleOnChange}
           />
           <input
             type="submit"
